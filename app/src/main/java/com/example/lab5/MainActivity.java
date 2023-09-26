@@ -8,10 +8,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     final String LOG_TAG = "myLogs";
     Button mBtnAdd, mBtnRead, mBtnClear;
     EditText mEdtName, mEdtEmail;
+    TextView mTextViewLog;
+    String someText;
     DBHelper mDbHelper;
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
@@ -38,9 +42,14 @@ public class MainActivity extends AppCompatActivity {
         mBtnClear.setOnClickListener(this :: onClick);
         mEdtName = (EditText) findViewById(R.id.editTextName);
         mEdtEmail = (EditText) findViewById(R.id.editTextEmail);
+        mTextViewLog = (TextView) findViewById(R.id.textViewLog);
+        mTextViewLog.setMovementMethod(new ScrollingMovementMethod());
         mDbHelper = new DBHelper(this);
     }
-//    @RequiresApi(api = Build.VERSION_CODES.O)
+    @SuppressLint("SetTextI18n")
+    public void concatTextView(String newStr) {
+        mTextViewLog.setText(String.format("%s\n%s", mTextViewLog.getText(), newStr));
+    }
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("NonConstantResourceId")
     public void onClick(View v) {
@@ -62,9 +71,11 @@ public class MainActivity extends AppCompatActivity {
             // вставляем запись и получаем ее ID
             long rowID = db.insert("mytable", null, cv);
             Log.d(LOG_TAG, "row inserted, ID = " + rowID);
+            concatTextView(String.format("%s%d", "\n--- Insert in mytable: ---\nrow inserted, ID = ", rowID));
         }
         if (v.getId() == R.id.buttonRead){
             Log.d(LOG_TAG, "--- Rows in mytable: ---");
+            concatTextView("\n--- Rows in mytable: ---");
             // делаем запрос всех данных из таблицы mytable, получаем Cursor
             Cursor c = db.query("mytable", null, null, null, null, null, null);
             // ставим позицию курсора на первую строку выборки
@@ -82,12 +93,18 @@ public class MainActivity extends AppCompatActivity {
                                     + ", name = " + c.getString(nameColIndex)
                                     + ", email = " + c.getString(emailColIndex)
                                     + ", date = " + c.getString(dateColIndex));
+                    concatTextView("ID = " + c.getInt(idColIndex)
+                            + ", name = " + c.getString(nameColIndex)
+                            + ", email = " + c.getString(emailColIndex)
+                            + ", date = " + c.getString(dateColIndex));
                     // переход на следующую строку
                     // а если следующей нет (текущая - последняя), то false -
                     // выходим из цикла
                 } while (c.moveToNext());
-            } else
+            } else {
                 Log.d(LOG_TAG, "0 rows");
+                concatTextView("0 rows");
+            }
             c.close();
         }
         if (v.getId() == R.id.buttonClear){
@@ -95,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
             // удаляем все записи
             int clearCount = db.delete("mytable", null, null);
             Log.d(LOG_TAG, "deleted rows count = " + clearCount);
+            concatTextView(String.format("%s%s","\n--- Clear mytable: ---\ndeleted rows count = ", clearCount));
         }
         // закрываем подключение к БД
         mDbHelper.close();
