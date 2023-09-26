@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">lab4</string>
+    <string name="Accelerometer">Акселерометр</string>
+    <string name="x" />
+    <string name="y" />
+    <string name="z" />
+    <string name="magnetic">Магнитный сенсор</string>
+    <string name="proximity">Приближение</string>
+    <string name="light">Освещённость</string>
+    <string name="authorsFullName">Миронов А.А.</string>
+</resources>
